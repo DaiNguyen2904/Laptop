@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order & Product Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+            font-size: 1.5em;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2em auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .button-group button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .chart-container, .table-container, .product-crud {
+            display: none; /* Bắt đầu bằng cách ẩn tất cả các phần */
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        .form-control {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1em;
+        }
+
+        .form-control label {
+            font-weight: bold;
+            margin-bottom: 0.5em;
+        }
+
+        .form-control input, .form-control textarea {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        .form-control button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    Order & Product Dashboard
+</header>
+
+<div class="container">
+    <div class="button-group">
+        <button onclick="showSection('orders')">Order Dashboard</button>
+        <button onclick="showSection('products')">Product CRUD</button>
+    </div>
+
+    <!-- Biểu đồ và bảng đơn hàng -->
+    <div id="ordersSection" class="chart-container table-container">
+        <h3>Số lượng đơn hàng theo ngày trong tháng</h3>
+        <canvas id="ordersChart"></canvas>
+
+        <h3>Thông tin đơn hàng</h3>
+        <table id="ordersTable">
+            <thead>
+            <tr>
+                <th>ID Đơn Hàng</th>
+                <th>Người Dùng</th>
+                <th>Ngày Đặt Hàng</th>
+                <th>Trạng Thái</th>
+                <th>Tổng Giá</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- CRUD sản phẩm -->
+    <div id="productsSection" class="product-crud">
+        <h3>Quản lý Sản phẩm</h3>
+        <div class="form-control">
+            <label for="productName">Tên sản phẩm</label>
+            <input type="text" id="productName" required>
+
+            <label for="productModel">Model</label>
+            <input type="text" id="productModel" required>
+
+            <label for="productDescription">Mô tả</label>
+            <textarea id="productDescription"></textarea>
+
+            <label for="productPrice">Giá</label>
+            <input type="number" id="productPrice" required>
+
+            <label for="productImageUrl">URL Hình ảnh</label>
+            <input type="text" id="productImageUrl">
+
+            <button onclick="saveProduct()">Lưu sản phẩm</button>
+            <button onclick="updateProduct()" style="display: none;" id="updateButton">Cập nhật sản phẩm</button>
+        </div>
+
+        <table id="productsTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên sản phẩm</th>
+                <th>Model</th>
+                <th>Mô tả</th>
+                <th>Giá</th>
+                <th>Hình ảnh</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let editingProductId = null; // Biến lưu id sản phẩm khi cập nhật
+
+    function showSection(section) {
+        document.getElementById('ordersSection').style.display = (section === 'orders') ? 'block' : 'none';
+        document.getElementById('productsSection').style.display = (section === 'products') ? 'block' : 'none';
+        if (section === 'orders') fetchData();
+        if (section === 'products') fetchProducts();
+    }
+
+    async function fetchData() {
+        try {
+            const month = 11;
+            const year = 2024;
+
+            const ordersCountByDayResponse = await fetch(`/api/orders/daily-count?month=${month}&year=${year}`);
+            const ordersCountByDay = await ordersCountByDayResponse.json();
+
+            const chartData = {
+                labels: Object.keys(ordersCountByDay),
+                datasets: [{
+                    label: 'Số lượng đơn hàng',
+                    data: Object.values(ordersCountByDay),
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true,
+                }]
+            };
+
+            const ctx = document.getElementById('ordersChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: { responsive: true }
+            });
+
+            const ordersResponse = await fetch('/api/orders');
+            const orders = await ordersResponse.json();
+            const ordersTable = document.getElementById('ordersTable').getElementsByTagName('tbody')[0];
+            ordersTable.innerHTML = '';
+            orders.forEach(order => {
+                const row = ordersTable.insertRow();
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.user?.name || 'N/A'}</td>
+                    <td>${new Date(order.orderDate).toLocaleDateString()}</td>
+                    <td>${order.status}</td>
+                    <td>${order.totalPrice}</td>
+                `;
+            });
+
+        } catch (error) {
+            console.error('Lỗi khi fetch dữ liệu:', error);
+        }
+    }
+
+    async function fetchProducts() {
+        try {
+            const response = await fetch('/api/products');
+            const products = await response.json();
+            const productsTable = document.getElementById('productsTable').getElementsByTagName('tbody')[0];
+            productsTable.innerHTML = '';
+            products.forEach(product => {
+                const row = productsTable.insertRow();
+                row.innerHTML = `
+                    <td>${product.id}</td>
+                    <td>${product.name}</td>
+                    <td>${product.model}</td>
+                    <td>${product.description}</td>
+                    <td>${product.price}</td>
+                    <td><img src="${product.imageUrl}" alt="${product.name}" width="50"></td>
+                    <td>
+                        <button onclick="editProduct(${product.id})">Sửa</button>
+                        <button onclick="deleteProduct(${product.id})">Xóa</button>
+                    </td>
+                `;
+            });
+        } catch (error) {
+            console.error('Lỗi khi fetch sản phẩm:', error);
+        }
+    }
+
+    async function saveProduct() {
+        const product = {
+            name: document.getElementById('productName').value,
+            model: document.getElementById('productModel').value,
+            description: document.getElementById('productDescription').value,
+            price: document.getElementById('productPrice').value,
+            imageUrl: document.getElementById('productImageUrl').value
+        };
+
+        await fetch('/api/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(product)
+        });
+        fetchProducts();
+    }
+
+    async function editProduct(id) {
+        const response = await fetch(`/api/products/${id}`);
+        const product = await response.json();
+
+        document.getElementById('productName').value = product.name;
+        document.getElementById('productModel').value = product.model;
+        document.getElementById('productDescription').value = product.description;
+        document.getElementById('productPrice').value = product.price;
+        document.getElementById('productImageUrl').value = product.imageUrl;
+
+        editingProductId = id;
+        document.getElementById('updateButton').style.display = 'inline-block';
+    }
+
+    async function updateProduct() {
+        if (!editingProductId) return;
+
+        const product = {
+            name: document.getElementById('productName').value,
+            model: document.getElementById('productModel').value,
+            description: document.getElementById('productDescription').value,
+            price: document.getElementById('productPrice').value,
+            imageUrl: document.getElementById('productImageUrl').value
+        };
+
+        await fetch(`/api/products/${editingProductId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(product)
+        });
+
+        editingProductId = null;
+        document.getElementById('updateButton').style.display = 'none';
+        fetchProducts();
+    }
+
+    async function deleteProduct(id) {
+        await fetch(`/api/products/${id}`, { method: 'DELETE' });
+        fetchProducts();
+    }
+</script>
+
+</body>
+</html>

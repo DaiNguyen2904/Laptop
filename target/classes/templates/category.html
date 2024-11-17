@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Danh Mục</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        td button {
+            background-color: #ff9800;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        td button:hover {
+            background-color: #f57c00;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 60%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Form Inputs */
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        form h3 {
+            margin-bottom: 10px;
+        }
+
+        form button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #45a049;
+        }
+
+        /* Delete Button */
+        .delete-button {
+            background-color: #f44336;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Quản lý Danh Mục</h1>
+
+    <!-- Nút Thêm Danh Mục -->
+    <button onclick="openCategoryModal()">Thêm Danh Mục Mới</button>
+
+    <!-- Danh Sách Danh Mục -->
+    <table>
+        <thead>
+        <tr>
+            <th>Tên Danh Mục</th>
+            <th>Số Lượng Sản Phẩm</th>
+            <th>Hành Động</th>
+        </tr>
+        </thead>
+        <tbody id="categories-list">
+        <!-- Các danh mục sẽ được hiển thị ở đây -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Tạo Danh Mục -->
+<div id="category-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeCategoryModal()">&times;</span>
+        <h2 id="modal-title">Tạo Danh Mục Mới</h2>
+        <form id="category-form" onsubmit="submitCategory(event)">
+            <label for="category-name">Tên Danh Mục:</label>
+            <input type="text" id="category-name" required />
+
+            <h3>Chọn Sản Phẩm:</h3>
+            <div id="products-list">
+                <!-- Các sản phẩm sẽ được hiển thị ở đây -->
+            </div>
+
+            <button type="submit">Lưu</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    let editingCategoryId = null; // Biến để lưu ID của danh mục đang chỉnh sửa
+
+    // Lấy danh sách các danh mục từ API
+    async function fetchCategories() {
+        const response = await fetch('/api/categories');
+        const categories = await response.json();
+
+        const categoriesList = document.getElementById('categories-list');
+        categoriesList.innerHTML = '';  // Xóa dữ liệu cũ
+
+        categories.forEach(category => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${category.name}</td>
+                    <td>${category.products.length}</td>
+                    <td>
+                        <button onclick="editCategory(${category.id})">Sửa</button>
+                        <button class="delete-button" onclick="deleteCategory(${category.id})">Xóa</button>
+                    </td>
+                `;
+            categoriesList.appendChild(row);
+        });
+    }
+
+    // Tạo hoặc cập nhật danh mục
+    async function submitCategory(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('category-name').value;
+        const selectedProducts = Array.from(document.querySelectorAll('.product-checkbox:checked')).map(checkbox => checkbox.value);
+        const productIds = selectedProducts.map(id => parseInt(id));
+
+        const method = editingCategoryId ? 'PUT' : 'POST';
+        const url = editingCategoryId ? `/api/categories/${editingCategoryId}` : '/api/categories';
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                ids: productIds
+            })
+        });
+
+        const category = await response.json();
+        fetchCategories();  // Cập nhật danh sách danh mục
+        closeCategoryModal();  // Đóng modal
+    }
+
+    // Mở Modal Tạo Danh Mục
+    function openCategoryModal() {
+        editingCategoryId = null; // Reset để tạo mới
+        document.getElementById('modal-title').textContent = 'Tạo Danh Mục Mới';
+        document.getElementById('category-name').value = ''; // Xóa tên cũ
+
+        // Hiển thị danh sách sản phẩm
+        fetchProducts();
+        document.getElementById('category-modal').style.display = 'block';
+    }
+
+    // Đóng Modal
+    function closeCategoryModal() {
+        document.getElementById('category-modal').style.display = 'none';
+    }
+
+    // Lấy danh sách sản phẩm
+    async function fetchProducts() {
+        const response = await fetch('/api/products');
+        const products = await response.json();
+
+        const productsList = document.getElementById('products-list');
+        productsList.innerHTML = ''; // Xóa dữ liệu cũ
+
+        products.forEach(product => {
+            const productCheckbox = document.createElement('div');
+            productCheckbox.innerHTML = `
+                    <input type="checkbox" class="product-checkbox" value="${product.id}" /> ${product.name}
+                `;
+            productsList.appendChild(productCheckbox);
+        });
+    }
+
+    // Sửa danh mục
+    async function editCategory(categoryId) {
+        editingCategoryId = categoryId;
+        const response = await fetch(`/api/categories/${categoryId}`);
+        const category = await response.json();
+
+        document.getElementById('modal-title').textContent = 'Chỉnh Sửa Danh Mục';
+        document.getElementById('category-name').value = category.name;
+
+        // Hiển thị sản phẩm đã được chọn trong modal
+        fetchProducts().then(() => {
+            const selectedProductIds = category.products.map(p => p.id);
+            const checkboxes = document.querySelectorAll('.product-checkbox');
+            checkboxes.forEach(checkbox => {
+                if (selectedProductIds.includes(parseInt(checkbox.value))) {
+                    checkbox.checked = true;
+                }
+            });
+        });
+
+        document.getElementById('category-modal').style.display = 'block';
+    }
+
+    // Xóa danh mục
+    async function deleteCategory(categoryId) {
+        const confirmDelete = confirm("Bạn có chắc chắn muốn xóa danh mục này?");
+        if (confirmDelete) {
+            const response = await fetch(`/api/categories/${categoryId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert("Danh mục đã được xóa!");
+                fetchCategories();  // Cập nhật lại danh sách sau khi xóa
+            } else {
+                alert("Xóa danh mục thất bại!");
+            }
+        }
+    }
+
+    // Fetch danh mục khi trang tải
+    window.onload = fetchCategories;
+</script>
+</body>
+</html>
