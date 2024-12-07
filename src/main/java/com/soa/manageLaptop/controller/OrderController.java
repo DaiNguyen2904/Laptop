@@ -28,7 +28,7 @@ public class OrderController {
         return orderService.getOrdersCountByMonth();
     }
 
-    @GetMapping("/api/orders")
+    @GetMapping("/byUserId")
     public ResponseEntity<List<Order>> getOrderByUser(@RequestParam Long id) {
         return ResponseEntity.ok(orderService.getOrdersByUser(id));
     }

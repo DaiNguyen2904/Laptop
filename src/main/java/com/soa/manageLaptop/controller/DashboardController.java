@@ -33,4 +33,59 @@ public class DashboardController {
     public String getCategories(Model model) {
         return "category";
     }
+
+    @GetMapping("/")
+    public String index(Model model) {
+        return "HomeShop";
+    }
+
+    @GetMapping("/register")
+    public String register(Model model) {
+        return "register";
+    }
+
+    @GetMapping("/login")
+    public String login(Model model) {
+        return "login";
+    }
+
+    @GetMapping("/log-out")
+    public String logout(Model model) {
+        return "logout";
+    }
+
+    @GetMapping("/home")
+    public String home(Model model) {
+        return "home";
+    }
+
+    @GetMapping("/checkout")
+    public String checkout(Model model) {
+        return "checkout";
+    }
+
+    @GetMapping("/payment-failure")
+    public String paymentFailure(Model model) {
+        return "payment-failure";
+    }
+
+    @GetMapping("/payment-success")
+    public String paymentSuccess(Model model) {
+        return "payment-success";
+    }
+
+    @GetMapping("/myOrder")
+    public String myOrder(Model model) {
+        return "myOrder";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPassword(Model model) {
+        return "forgetPassword";
+    }
+
+    @GetMapping("/productDetail")
+    public String productDetails(Model model) {
+        return "productDetail";
+    }
 }

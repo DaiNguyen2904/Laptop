@@ -1,10 +1,10 @@
 package com.soa.manageLaptop.service;
 
-import com.laptop.ManagerUsers.request.AuthenticationRequest;
-import com.laptop.ManagerUsers.request.IntrospectRequest;
-import com.laptop.ManagerUsers.request.LogoutRequest;
-import com.laptop.ManagerUsers.dto.response.AuthenticationResponse;
-import com.laptop.ManagerUsers.dto.response.IntrospectResponse;
+import com.Laptop.ManagerUsers.request.AuthenticationRequest;
+import com.Laptop.ManagerUsers.request.IntrospectRequest;
+import com.Laptop.ManagerUsers.request.LogoutRequest;
+import com.soa.manageLaptop.dto.AuthenticationResponse;
+import com.soa.manageLaptop.dto.IntrospectResponse;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -139,7 +139,7 @@ public class AuthenticationService {
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(users.getUsername())
-                .issuer("laptop")
+                .issuer("Laptop")
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()

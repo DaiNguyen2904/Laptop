@@ -1,4 +1,4 @@
-package com.laptop.ManagerUsers.request;
+package com.Laptop.ManagerUsers.request;
 
 
 import lombok.*;

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            width: 400px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="email"], input[type="password"], input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            text-align: center;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .login-link a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Đăng ký</h2>
+    <form id="registerForm">
+        <label for="username">Tên đăng nhập</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="phone">Số điện thoại</label>
+        <input type="tel" id="phone" name="phone" required>
+
+        <label for="password">Mật khẩu</label>
+        <input type="password" id="password" name="password" required>
+
+        <label for="confirmPassword">Nhập lại mật khẩu</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required>
+
+        <div style="padding-left: 20%;padding-right: 20%"><input type="submit" value="Đăng ký"></div>
+    </form>
+    <div class="error-message" id="error-message"></div>
+
+    <!-- Login link -->
+    <div class="login-link">
+        <p><a style="color: #007bff; font-weight: normal" href="/login">Bạn đã có tài khoản ư?</a></p>
+    </div>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+            document.getElementById('error-message').textContent = "Mật khẩu không khớp!";
+            return;
+        }
+
+        const data = {
+            username: username,
+            email: email,
+            phone: phone,
+            password: password
+        };
+
+        fetch('/api/users/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('Đăng ký thành công! Hệ thống sẽ chuyển bạn về trang đăng nhập');
+                    window.location.href='/login'
+                    document.getElementById('registerForm').reset();
+                    document.getElementById('error-message').textContent = '';
+
+                } else {
+                    return response.text();
+                }
+            })
+            .then(errorMessage => {
+                if (errorMessage) {
+                    document.getElementById('error-message').textContent = errorMessage;
+                    if (document.getElementById('error-message').textContent === 'User already exists') {
+                        window.alert('Tài khoản đã tồn tại vui lòng thử đăng nhập hoặc tạo tài khoản khác!');
+                        window.location.href = "/login"
+                    }
+                }
+            })
+            .catch(error => {
+                document.getElementById('error-message').textContent = 'Đã xảy ra lỗi. Vui lòng thử lại.';
+            });
+    });
+
+</script>
+</body>
+</html>

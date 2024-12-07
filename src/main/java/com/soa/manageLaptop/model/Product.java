@@ -20,17 +20,18 @@ public class Product {
     private Long id;
     private String name;
     private String model;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
     private double price;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
     @JsonBackReference
     private Category category;
-
-    @ManyToMany(mappedBy = "products")
-    private List<Promotion> promotions;
 
     public Product(String laptopA, String laptopA1, String brandA, String descriptionA, int i, String image) {
     }

@@ -1,11 +1,11 @@
 package com.soa.manageLaptop.controller;
 
-import com.laptop.ManagerUsers.request.AuthenticationRequest;
-import com.laptop.ManagerUsers.request.IntrospectRequest;
-import com.laptop.ManagerUsers.dto.response.ApiResponse;
-import com.laptop.ManagerUsers.dto.response.AuthenticationResponse;
-import com.laptop.ManagerUsers.dto.response.IntrospectResponse;
-import com.laptop.ManagerUsers.request.LogoutRequest;
+import com.Laptop.ManagerUsers.request.AuthenticationRequest;
+import com.Laptop.ManagerUsers.request.IntrospectRequest;
+import com.soa.manageLaptop.dto.ApiResponse;
+import com.soa.manageLaptop.dto.AuthenticationResponse;
+import com.soa.manageLaptop.dto.IntrospectResponse;
+import com.Laptop.ManagerUsers.request.LogoutRequest;
 import com.nimbusds.jose.JOSEException;
 import com.soa.manageLaptop.service.AuthenticationService;
 import lombok.*;

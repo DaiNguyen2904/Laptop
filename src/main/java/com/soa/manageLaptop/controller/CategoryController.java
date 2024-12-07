@@ -1,6 +1,6 @@
 package com.soa.manageLaptop.controller;
 
-import com.soa.manageLaptop.dto.response.request.CategoryRequest;
+import com.soa.manageLaptop.dto.request.CategoryRequest;
 import com.soa.manageLaptop.model.Category;
 import com.soa.manageLaptop.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;

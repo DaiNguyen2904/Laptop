@@ -1,4 +1,4 @@
-package com.Laptop.ManagerUsers.request;
+package com.soa.manageLaptop.dto;
 
 
 import lombok.*;
@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class IntrospectRequest {
+public class AuthenticationResponse {
     String token;
+    boolean authenticated;
 }

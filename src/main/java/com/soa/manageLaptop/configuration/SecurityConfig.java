@@ -57,7 +57,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,PUBLIC_GET_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_UI_ENDPOINTS).permitAll()
                                 .requestMatchers(HttpMethod.DELETE,"api/products/**","/**").permitAll()
-                                .requestMatchers(HttpMethod.PUT,"api/products/**","api/categories/**").permitAll()
+                                .requestMatchers(HttpMethod.PUT,"api/products/**","api/categories/**","/**").permitAll()
 //                        .requestMatchers(HttpMethod.GET, "", "").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )

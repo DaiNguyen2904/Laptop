@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Shop</title>
+    <style>
+        /* Các style đã có */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header-buttons {
+            /*display: flex;*/
+            gap: 10px;
+            text-align: center/* Add space between buttons */
+        }
+
+        .header-buttons button {
+            background-color: #ff5733;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .header-buttons button:hover {
+            background-color: #ff3d1a;
+        }
+
+        .product-list {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);  /* 5 sản phẩm mỗi hàng */
+            gap: 20px;
+            padding: 20px;
+            margin: 0 auto;
+            max-width: 70%;  /* Chiều rộng tối đa 70% */
+        }
+
+        .product-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 350px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .product-card:hover {
+            transform: scale(1.05);
+        }
+
+        .product-card img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        /* Giới hạn tên sản phẩm */
+        .product-card h2 {
+            font-size: 18px;
+            margin: 10px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            display: block;
+            width: 100%;
+        }
+
+        .product-card h2::after {
+            content: attr(title);
+            display: none;
+        }
+
+        /* Mô tả và giá */
+        .product-card p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .product-card .price {
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* Nút mua */
+        .btn-add-to-cart {
+            background-color: #ff5733;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .btn-add-to-cart:hover {
+            background-color: #ff3d1a;
+        }
+
+        /* Phân trang */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 0 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .pagination button:hover {
+            background-color: #ff5733;
+        }
+
+        .pagination button.disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
+        /* Thêm style cho ô tìm kiếm và lọc */
+        /* Cập nhật style cho ô tìm kiếm và ô lọc */
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .thangcho{
+            display: flex;
+            gap: 10px;
+        }
+        .filters input {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 30%; /* Giảm chiều rộng */
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .filters input:focus {
+            border-color: #ff5733;
+            outline: none;
+        }
+
+
+        .filters input:last-child {
+            margin-right: 0;
+        }
+
+        #checkout-button {
+            background-color: #ff5733;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            position: relative;  /* Để đặt số lượng lên trên nút */
+            transition: background-color 0.3s;
+        }
+
+        #checkout-button:hover {
+            background-color: #ff3d1a;
+        }
+        #order-button {
+            background-color: #ff5733;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            position: relative;  /* Để đặt số lượng lên trên nút */
+            transition: background-color 0.3s;
+        }
+
+
+
+    </style>
+</head>
+<body>
+<header>
+    <h1>Laptop ABC xin chào quý khách</h1>
+    <div class="header-buttons">
+        <button onclick="window.location.href='log-out'">Đăng xuất</button>
+    </div>
+</header>
+
+<div class="filters">
+    <input type="text" id="search" placeholder="Tìm kiếm sản phẩm theo tên" oninput="filterProducts()">
+    <div>
+        <input type="number" id="min-price" placeholder="Giá tối thiểu" oninput="filterProducts()">
+        <input type="number" id="max-price" placeholder="Giá tối đa" oninput="filterProducts()">
+    </div>
+    <div class="thangcho">
+        <button id="order-button" onclick="window.location.href='/myOrder'">Đơn hàng của tôi</button>
+        <button id="checkout-button" onclick="window.location.href='/checkout'">Thanh toán (0)</button>
+    </div>
+
+
+
+</div>
+
+<div id="product-list" class="product-list">
+    <!-- Products will be dynamically loaded here -->
+</div>
+
+<div class="pagination" id="pagination">
+    <!-- Pagination buttons will be dynamically loaded here -->
+</div>
+
+<script>
+    const checkTokenAndRedirect = () => {
+        const jwtToken = localStorage.getItem('jwtToken');
+        const username = localStorage.getItem('username');
+
+        if(!jwtToken ||  !username){
+            window.location.href='/'
+        }
+
+        if (jwtToken && username) {
+            // Tạo đối tượng yêu cầu xác thực
+            const introspectRequest = {
+                token: jwtToken
+            };
+
+            // Gửi yêu cầu API để kiểm tra token
+            fetch('/auth/introspect', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(introspectRequest)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 200 && data.result && data.result.valid === true) {
+                        // Kiểm tra nếu username là "admin", chuyển đến /dashboard, nếu không chuyển đến /home
+                        if (username === 'admin') {
+                            // window.location.href = '/';
+                        } else {
+                            // window.location.href = '/';
+                        }
+                    } else {
+                        // Token không hợp lệ, thực hiện hành động khác nếu cần
+                        alert('Token không hợp lệ, vui lòng đăng nhập lại.');
+                        window.location.href='/'
+                        localStorage.removeItem('jwtToken')
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi kiểm tra token:', error);
+                });
+        } else {
+        }
+    };
+
+    // Gọi hàm kiểm tra token và chuyển hướng khi tải trang
+    checkTokenAndRedirect();
+    let currentPage = 0;
+    const pageSize = 10;
+    let searchQuery = '';
+    let minPrice = 0;
+    let maxPrice = 100000000;
+
+    let debounceTimeout;
+
+    function debounce(func, delay) {
+        clearTimeout(debounceTimeout);  // Hủy bỏ các lần gọi trước đó
+        debounceTimeout = setTimeout(func, delay);  // Gọi func sau delay (500ms)
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchProducts(currentPage);
+    });
+
+    // Lọc theo tìm kiếm và giá tiền
+    function filterProducts() {
+        searchQuery = document.getElementById('search').value;
+        minPrice = parseFloat(document.getElementById('min-price').value) || 0;
+        maxPrice = parseFloat(document.getElementById('max-price').value) || 100000000;
+
+        debounce(function() {
+            fetchProducts(currentPage);
+        }, 500);
+    }
+
+    // Áp dụng bộ lọc (Chỉ lọc khi thay đổi giá)
+    function applyFilters() {
+        fetchProducts(currentPage);
+    }
+
+    function fetchProducts(page) {
+        // Kiểm tra nếu người dùng nhập giá tiền hay không
+        const url = `http://localhost:8080/api/products/products?page=${page}&size=${pageSize}&search=${searchQuery}&minPrice=${minPrice}&maxPrice=${maxPrice}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                displayProducts(data.content);  // `data.content` for the product list
+                displayPagination(data.totalPages, page);  // Pass total pages and current page
+            })
+            .catch(error => console.error('Error fetching products:', error));
+    }
+
+    function displayPagination(totalPages, currentPage) {
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = ''; // Xóa các nút phân trang hiện có
+
+        // Nút Previous
+        const prevButton = document.createElement('button');
+        prevButton.innerText = 'Trang trước';
+        prevButton.disabled = currentPage === 0; // Vô hiệu hóa nếu đang ở trang đầu
+        prevButton.onclick = () => {
+            if (currentPage > 0) {
+                fetchProducts(currentPage - 1);
+            }
+        };
+        pagination.appendChild(prevButton);
+
+        // Các nút số trang
+        for (let i = 0; i < totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.innerText = i + 1;
+            pageButton.disabled = i === currentPage; // Vô hiệu hóa nút của trang hiện tại
+            pageButton.onclick = () => fetchProducts(i);
+            pagination.appendChild(pageButton);
+        }
+
+        // Nút Next
+        const nextButton = document.createElement('button');
+        nextButton.innerText = 'Trang sau';
+        nextButton.disabled = currentPage === totalPages - 1; // Vô hiệu hóa nếu đang ở trang cuối
+        nextButton.onclick = () => {
+            if (currentPage < totalPages - 1) {
+                fetchProducts(currentPage + 1);
+            }
+        };
+        pagination.appendChild(nextButton);
+    }
+
+    function displayProducts(products) {
+        const productList = document.getElementById('product-list');
+        productList.innerHTML = '';  // Xóa danh sách sản phẩm hiện tại
+
+        products.forEach(product => {
+            const productCard = document.createElement('div');
+            productCard.classList.add('product-card');
+            productCard.onclick = function() {
+                localStorage.setItem('productId', product.id);
+                // Chuyển hướng đến trang chi tiết sản phẩm
+                window.location.href = '/productDetail'; // Chuyển hướng đến trang chi tiết sản phẩm
+            };
+            // Giới hạn tên sản phẩm tối đa 20 ký tự
+            const productName = product.name.length > 20 ? product.name.substring(0, 20) + '...' : product.name;
+
+            productCard.innerHTML = `
+            <img src="${product.imageUrl}" alt="${product.name}">
+            <h2 title="${product.name}">${productName}</h2>
+            <div class="price">${formatPrice(product.price)} VNĐ</div>
+            <button class="btn-add-to-cart" onclick="">Thêm vào giỏ hàng</button>
+        `;
+            const addToCartButton = productCard.querySelector('.btn-add-to-cart');
+            addToCartButton.onclick = function(event) {
+                event.stopPropagation();  // Ngừng việc chuyển trang khi nhấn vào nút "Thêm vào giỏ hàng"
+                addToCart(product.id);    // Gọi hàm addToCart và truyền ID sản phẩm vào
+            };
+
+            productList.appendChild(productCard);
+        });
+    }
+
+    // Hàm thêm sản phẩm vào giỏ hàng
+    // Hàm thêm sản phẩm vào giỏ hàng (cập nhật với số lượng)
+    function addToCart(productId) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];  // Lấy giỏ hàng từ localStorage, nếu không có thì khởi tạo giỏ hàng rỗng
+
+        // Kiểm tra nếu sản phẩm đã có trong giỏ hàng
+        cart.push(productId);
+
+        // Lưu lại giỏ hàng vào localStorage
+        localStorage.setItem('cart', JSON.stringify(cart));
+
+        updateCartCount();
+    }
+
+    // Hàm lấy giỏ hàng (cập nhật trả về số lượng tổng)
+    function getCart() {
+        return JSON.parse(localStorage.getItem('cart')) || [];
+    }
+
+    // Cập nhật số lượng sản phẩm trong nút Checkout
+    // Cập nhật số lượng sản phẩm trong nút Checkout
+    function updateCartCount() {
+        const cart = getCart();
+        const cartCount = cart.length;  // Tính tổng số sản phẩm trong giỏ hàng (số phần tử trong mảng)
+        const checkoutButton = document.getElementById('checkout-button');
+        checkoutButton.innerHTML = `Giỏ hàng (${cartCount})`;  // Cập nhật số lượng vào nút Checkout
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCartCount();  // Cập nhật số lượng khi trang tải xong
+        fetchProducts(currentPage);  // Lấy dữ liệu sản phẩm nếu cần
+    });
+
+    // Hàm xử lý thanh toán và tạo đơn hàng
+    function checkout() {
+        let userId = localStorage.getItem('user_id');  // Lấy user_id từ localStorage
+        userId = 1;
+        const productIds = getCart();  // Lấy danh sách sản phẩm trong giỏ hàng
+
+        if (!userId || productIds.length === 0) {
+            alert("Please log in and add products to your cart!");
+            return;
+        }
+
+        // Gửi yêu cầu tạo đơn hàng tới server
+        const orderRequest = {
+            userId: userId,
+            productIds: productIds
+        };
+
+        fetch('http://localhost:8080/api/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderRequest),
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert("Order created successfully!");
+                localStorage.removeItem('cart');  // Xóa giỏ hàng sau khi thanh toán thành công
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Error creating order.");
+            });
+    }
+
+    function getUserId(){
+        const username = localStorage.getItem('username');
+        fetch(`/api/users/${username}`)
+            .then(response => {
+                // Kiểm tra xem phản hồi có thành công hay không
+                if (response.ok) {
+                    return response.text();  // Lấy dữ liệu dạng văn bản
+                }
+                throw new Error('Failed to fetch data');
+            })
+            .then(id => {
+                // Lưu id vào localStorage
+                localStorage.setItem('user_id', id);
+                console.log('User ID saved:', id);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    getUserId()
+
+    function formatPrice(price) {
+        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+
+</script>
+</body>
+</html>

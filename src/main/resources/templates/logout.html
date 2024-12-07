@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng xuất</title>
+    <link rel="icon" type="image/x-icon" href="/imgs/favicon.png"/>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+
+        .logout-message {
+            text-align: center;
+        }
+
+        .loading {
+            font-size: 18px;
+            color: #007bff;
+        }
+
+        .error {
+            color: red;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="logout-message">
+    <h1>Đang đăng xuất...</h1>
+    <p class="loading">Vui lòng chờ...</p>
+</div>
+
+<script>
+    // Hàm thực hiện đăng xuất
+    const logout = () => {
+        const jwtToken = localStorage.getItem('jwtToken');
+
+        if (!jwtToken) {
+            alert('Không có token để đăng xuất.');
+            window.location.href = '/login'; // Chuyển hướng về trang đăng nhập nếu không có token
+            return;
+        }
+
+        // Gửi yêu cầu đăng xuất đến server
+        fetch('/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + jwtToken
+            },
+            body: JSON.stringify({ token: jwtToken })
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Xóa token và thông tin người dùng trong localStorage
+                    localStorage.removeItem('jwtToken');
+                    localStorage.removeItem('username');
+                    localStorage.removeItem('user_id');
+                    localStorage.removeItem('cart')
+                    window.location.href = '/login'; // Sau khi đăng xuất thành công, chuyển hướng về trang login
+                } else {
+                    alert('Đăng xuất không thành công.');
+                    window.location.href = '/login'; // Nếu đăng xuất không thành công, chuyển hướng về trang login
+                }
+            })
+            .catch(error => {
+                console.error('Lỗi đăng xuất:', error);
+                alert('Đã xảy ra lỗi khi đăng xuất. Vui lòng thử lại sau.');
+                window.location.href = '/login'; // Xử lý lỗi khi gửi yêu cầu
+            });
+    };
+
+    // Thực hiện đăng xuất khi trang được tải
+    logout();
+</script>
+
+</body>
+</html>
