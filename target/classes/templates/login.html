@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form đăng nhập</title>
+    <link rel="stylesheet" href="/css/loginStyle.css">
+    <link rel="icon" type="image/x-icon" href="/imgs/favicon.png"/>
+</head>
+<style>
+    body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .input-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    button[type="submit"],
+    .google-login-btn {
+        background-color: #0866ff;
+        color: #fff;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+
+    button[type="submit"]:hover,
+    .google-login-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .signup-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .signup-link a {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .signup-link a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 20px;
+        }
+
+        button[type="submit"],
+        .google-login-btn {
+            padding: 10px;
+            font-size: 14px;
+        }
+    }
+
+</style>
+<body>
+<div><a href="/"><img style="width: 8%;position: absolute;top:0" src="https://images.vexels.com/content/157295/preview/computer-laptop-icon-495a5f.png"></a></div>
+<div class="container">
+    <form id="loginForm">
+        <h2>Đăng nhập</h2>
+        <div class="input-group">
+            <label for="username">Tên đăng nhập:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="input-group">
+            <label for="password">Mật khẩu:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" style="font-weight: bold ">Đăng nhập</button>
+        <div class="signup-link">
+            <p> <a href="/forgot-password">Quên mật khẩu?</a></p>
+        </div>
+        <hr></hr>
+        <div style="padding-left: 25%; padding-right: 25%">
+            <button  type="button" style="background-color: #42b72a" class="google-login-btn" onclick="window.location.href='/register'">Tạo tài khoản mới</button>
+
+        </div>
+    </form>
+</div>
+<script src="/js/loginJs.js"> </script>
+<script>
+    function gg(){
+        window.alert('He thong se som cap nhat chuc nang nay')
+    }
+</script>
+</body>
+</html>

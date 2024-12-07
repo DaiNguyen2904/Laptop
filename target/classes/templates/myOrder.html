@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .order-list {
+            margin-top: 20px;
+        }
+
+        .order-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        .order-item h2 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .order-item p {
+            color: #666;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .product {
+            border-top: 1px solid #ddd;
+            padding: 10px;
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .product-info {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .product img {
+            max-width: 50px;
+            max-height: 50px;
+            object-fit: cover;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .product-table th,
+        .product-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .table-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .table-data {
+            flex: 1;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .order-list-image {
+            max-width: 50px;
+            max-height: 50px;
+            object-fit: cover;
+        }
+        .product-container{
+            padding: 10px 0px;
+        }
+    </style>
+</head>
+<body>
+<div><a href="/"><img style="width: 8%;position: fixed;top:0" src="https://images.vexels.com/content/157295/preview/computer-laptop-icon-495a5f.png"></a></div>
+<div class="container">
+    <h1>Đơn hàng của tôi</h1>
+    <div id="order-list" class="order-list">
+        
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const userId = localStorage.getItem('user_id'); // Lấy user_id từ localStorage
+        const orderListContainer = document.getElementById('order-list');
+
+        if (userId) {
+            fetchOrders(userId);
+        } else {
+            orderListContainer.innerHTML = '<p>User not logged in</p>';
+        }
+
+        // Lấy danh sách đơn hàng từ API
+        function fetchOrders(userId) {
+            fetch(`api/orders/byUserId?id=${userId}`)
+                .then(response => response.json())
+                .then(orders => {
+                    if (orders.length > 0) {
+                        // Sắp xếp danh sách đơn hàng theo thời gian từ mới nhất đến cũ nhất
+                        orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+                        displayOrders(orders);
+                    } else {
+                        orderListContainer.innerHTML = '<p>No orders found.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching orders:', error);
+                    orderListContainer.innerHTML = '<p>Failed to load orders.</p>';
+                });
+        }
+
+        // Hiển thị danh sách đơn hàng
+        function displayOrders(orders) {
+            orderListContainer.innerHTML = ''; // Clear the list before adding new orders
+
+            orders.forEach(order => {
+                const orderItem = document.createElement('div');
+                orderItem.classList.add('order-item');
+                orderItem.id = `order-${order.id}`;
+
+                // Thêm thúông tin đơn hàng
+                orderItem.innerHTML = `
+                <h2>Đơn hàng #${order.id}</h2>
+                <p><strong>Trạng thái</strong> ${order.status}</p>
+                <p><strong>Ngày đặt hàng:</strong> ${new Date(order.orderDate).toLocaleString()}</p>
+                <p><strong>Tổng tiền:</strong> ${formatPrice(order.totalPrice)} VND</p>
+            `;
+
+                // Hiển thị sản phẩm trong đơn hàng
+                const productContainer = document.createElement('div');
+                productContainer.classList.add('product-container');
+
+                // Đếm số lần xuất hiện của từng sản phẩm
+                const productCounts = countProductOccurrences(order.productIds);
+                productCounts.forEach(([productId, count]) => {
+                    fetchProductById(productId, count, productContainer);
+                });
+
+                // Thêm container sản phẩm vào trước nút "Pay Now"
+                orderItem.appendChild(productContainer);
+
+                // Thêm nút "Pay Now"
+                if (order.status === 'PENDING') {
+                    const payNowButton = document.createElement('button');
+                    payNowButton.textContent = 'Thanh toán ngay';
+                    payNowButton.onclick = () => handlePayment(order.id, order.totalPrice);
+                    orderItem.appendChild(payNowButton);
+                }
+
+                // Thêm đơn hàng vào danh sách
+                orderListContainer.appendChild(orderItem);
+            });
+        }
+
+        // Lấy thông tin sản phẩm từ API và hiển thị
+        function fetchProductById(productId, count, productContainer) {
+            fetch(`api/products/${productId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch product');
+                    }
+                    return response.json();
+                })
+                .then(product => {
+                    // Kiểm tra nếu chưa có bảng, tạo mới
+                    if (!productContainer.querySelector('table')) {
+                        const table = document.createElement('table');
+                        table.classList.add('product-table');
+                        table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>Tên</th>
+                                <th>Ảnh</th>
+                                <th>Model</th>
+                                <th>Giá tiền</th>
+                                <th>Số lượng</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    `;
+                        productContainer.appendChild(table);
+                    }
+
+                    // Thêm sản phẩm vào body của bảng
+                    const tbody = productContainer.querySelector('table tbody');
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td class="table-data">${product.name}</td>
+                    <td class="table-data">
+                        <img src="${product.imageUrl}" alt="${product.name}" class="order-list-image"/>
+                    </td>
+                    <td class="table-data">${product.model}</td>
+                    <td class="table-data">${formatPrice(product.price)} VNĐ</td>
+                    <td class="table-data">${count}</td>
+                `;
+                    tbody.appendChild(row);
+                })
+                .catch(error => {
+                    console.error('Error fetching product:', error);
+                    productContainer.innerHTML = '<p>Failed to load product details.</p>';
+                });
+        }
+
+        // Đếm số lần xuất hiện của từng sản phẩm
+        function countProductOccurrences(productIds) {
+            const productCountMap = new Map();
+
+            productIds.forEach(id => {
+                productCountMap.set(id, (productCountMap.get(id) || 0) + 1);
+            });
+
+            return [...productCountMap.entries()];
+        }
+
+        // Xử lý thanh toán
+        window.handlePayment = async function (orderId, totalPrice) {
+            try {
+                const response = await fetch(`http://localhost:8080/api/v1/vn-pay?amount=${totalPrice}&bankNumber=${orderId}`);
+                const data = await response.json();
+
+                if (response.ok && data.result.code === 'ok') {
+                    const paymentUrl = data.result.paymentUrl;
+                    // Chuyển hướng người dùng đến trang thanh toán của VNPAY
+                    window.location.href = paymentUrl;
+                } else {
+                    alert('Không thể thực hiện giao dịch: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Có lỗi xảy ra khi nạp tiền:', error);
+            }
+        };
+
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo Thanh toán Thành công</title>
+    <style>
+        /* Đặt lại các kiểu mặc định cho các phần tử */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .notification-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .notification {
+            background-color: #4CAF50;
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        .notification h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .notification p {
+            font-size: 16px;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="notification-container">
+    <div class="notification">
+        <h1>Thanh toán thành công!</h1>
+        <p>Chúng tôi sẽ chuyển bạn đến trang đơn hàng của bạn trong ít giây.</p>
+    </div>
+</div>
+
+<script>
+    // Chờ 2 giây rồi chuyển hướng đến '/myOrder'
+    setTimeout(function() {
+        window.location.href = '/myOrder';
+    }, 2000);
+</script>
+</body>
+</html>
