@@ -129,6 +129,21 @@
         #checkout-button:hover {
             background-color: #ff3d1a;
         }
+        .checkout-details {
+            margin-top: 20px;
+        }
+        .checkout-details label {
+            display: block;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .checkout-details input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -146,7 +161,15 @@
         Tổng tiền: 0.00 VNĐ
     </div>
 
-    <button id="checkout-button" onclick="checkout()">Thanh toán</button>
+    <div class="checkout-details">
+        <label for="address">Địa chỉ giao hàng:</label>
+        <input type="text" id="address" placeholder="Nhập địa chỉ giao hàng" required>
+
+        <label for="phoneNumber">Số điện thoại:</label>
+        <input type="text" id="phoneNumber" placeholder="Nhập số điện thoại" required>
+    </div>
+
+    <button id="checkout-button" onclick="check()">Xác nhận</button>
 </div>
 
 <script>
@@ -239,20 +262,34 @@
         displayCartItems();  // Cập nhật lại giỏ hàng
     }
 
+    function check(){
+        const address = document.getElementById('address').value.trim();
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        if(!address || !phoneNumber){
+            alert("Vui long nhap du thong tin!")
+        }
+        else checkout();
+    }
 
 
     function checkout() {
         let userId = localStorage.getItem('user_id');
         const productIds = getCart();  // Lấy danh sách sản phẩm trong giỏ hàng
+        const address = document.getElementById('address').value.trim();
+        const phoneNumber = document.getElementById('phoneNumber').value.trim();
         if (!userId || productIds.length === 0) {
             alert("Bạn chưa đăng nhập hoặc chưa có bất kì sản phẩm nào trong rỏ hàng!");
             return;
         }
 
+
+
         // Gửi yêu cầu tạo đơn hàng tới server
         const orderRequest = {
             userId: userId,
-            productIds: productIds
+            productIds: productIds,
+            address: address,
+            phoneNumber: phoneNumber
         };
 
         fetch('http://localhost:8080/api/orders', {
